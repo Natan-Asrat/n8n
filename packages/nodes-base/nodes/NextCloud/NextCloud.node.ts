@@ -85,22 +85,6 @@ export class NextCloud implements INodeType {
 						name: 'User',
 						value: 'user',
 					},
-					{
-						name: 'Deck',
-						value: 'deck',
-					},
-					{
-						name: 'Notes',
-						value: 'notes',
-					},
-					{
-						name: 'Tables',
-						value: 'tables',
-					},
-					{
-						name: 'Talk',
-						value: 'talk',
-					},
 				],
 				default: 'file',
 			},
@@ -108,7 +92,6 @@ export class NextCloud implements INodeType {
 			// ----------------------------------
 			//         operations
 			// ----------------------------------
-			// Existing File Operations
 			{
 				displayName: 'Operation',
 				name: 'operation',
@@ -159,7 +142,7 @@ export class NextCloud implements INodeType {
 				],
 				default: 'upload',
 			},
-			// Existing Folder Operations
+
 			{
 				displayName: 'Operation',
 				name: 'operation',
@@ -210,7 +193,7 @@ export class NextCloud implements INodeType {
 				],
 				default: 'create',
 			},
-			// Existing User Operations
+
 			{
 				displayName: 'Operation',
 				name: 'operation',
@@ -254,352 +237,6 @@ export class NextCloud implements INodeType {
 					},
 				],
 				default: 'create',
-			},
-			// Deck Operations
-			{
-				displayName: 'Operation',
-				name: 'operation',
-				type: 'options',
-				noDataExpression: true,
-				displayOptions: {
-					show: {
-						resource: ['deck'],
-					},
-				},
-				options: [
-					{
-						name: 'Create Board',
-						value: 'createBoard',
-						description: 'Create a new Deck board',
-					},
-					{
-						name: 'Get Boards',
-						value: 'getBoards',
-						description: 'Retrieve all Deck boards',
-					},
-					{
-						name: 'Update Board',
-						value: 'updateBoard',
-						description: 'Update an existing Deck board',
-					},
-					{
-						name: 'Delete Board',
-						value: 'deleteBoard',
-						description: 'Delete a Deck board',
-					},
-				],
-				default: 'getBoards',
-				description: 'The operation to perform.',
-			},
-			// Deck Fields
-			{
-				displayName: 'Board ID',
-				name: 'boardId',
-				type: 'string',
-				default: '',
-				required: true,
-				displayOptions: {
-					show: {
-						resource: ['deck'],
-						operation: ['updateBoard', 'deleteBoard'],
-					},
-				},
-				placeholder: '12345',
-				description: 'The ID of the Deck board',
-			},
-			{
-				displayName: 'Board Title',
-				name: 'boardName',
-				type: 'string',
-				default: '',
-				required: true,
-				displayOptions: {
-					show: {
-						resource: ['deck'],
-						operation: ['createBoard', 'updateBoard'],
-					},
-				},
-				placeholder: 'Project Management',
-				description: 'Name of the Deck board',
-			},
-			{
-				displayName: 'Board Color',
-				name: 'boardColor',
-				type: 'color', // Use this if n8n supports color types
-				default: '#FFFFFF', // Default color in hexadecimal
-				required: false, // Optional color field
-				displayOptions: {
-					show: {
-						resource: ['deck'],
-						operation: ['createBoard', 'updateBoard'],
-					},
-				},
-				description: 'Select a color for the board',
-			},
-			{
-				displayName: 'Archived',
-				name: 'archivedBoard',
-				type: 'boolean',
-				default: false,
-				required: false,
-				displayOptions: {
-					show: {
-						resource: ['deck'],
-						operation: ['updateBoard'],
-					},
-				},
-				description: 'Archive the board or not',
-			},
-			// Notes Operations
-			{
-				displayName: 'Operation',
-				name: 'operation',
-				type: 'options',
-				noDataExpression: true,
-				displayOptions: {
-					show: {
-						resource: ['notes'],
-					},
-				},
-				options: [
-					{
-						name: 'Create Note',
-						value: 'createNote',
-						description: 'Create a new Note',
-					},
-					{
-						name: 'Get Notes',
-						value: 'getNotes',
-						description: 'Retrieve all Notes',
-					},
-					{
-						name: 'Get a Note',
-						value: 'getNote',
-						description: 'Retrieve a single Note',
-					},
-					{
-						name: 'Update Note',
-						value: 'updateNote',
-						description: 'Update an existing Note',
-					},
-					{
-						name: 'Delete Note',
-						value: 'deleteNote',
-						description: 'Delete a Note',
-					},
-				],
-				default: 'getNotes',
-				description: 'The operation to perform.',
-			},
-			// Notes Fields
-			{
-				displayName: 'Note ID',
-				name: 'noteId',
-				type: 'string',
-				default: '',
-				required: true,
-				displayOptions: {
-					show: {
-						resource: ['notes'],
-						operation: ['updateNote', 'deleteNote'],
-					},
-				},
-				placeholder: '67890',
-				description: 'The ID of the Note',
-			},
-			{
-				displayName: 'Content',
-				name: 'content',
-				type: 'string',
-				default: '',
-				required: true,
-				displayOptions: {
-					show: {
-						resource: ['notes'],
-						operation: ['createNote', 'updateNote'],
-					},
-				},
-				placeholder: 'Meeting notes...',
-				description: 'Content of the Note',
-			},
-			{
-				displayName: 'Title',
-				name: 'noteTitle',
-				type: 'string',
-				default: 'New note',
-				required: true,
-				displayOptions: {
-					show: {
-						resource: ['notes'],
-						operation: ['createNote'],
-					},
-				},
-				placeholder: 'New note...',
-				description: 'Title of the Note',
-			},
-			{
-				displayName: 'Category',
-				name: 'noteCategory',
-				type: 'string',
-				default: '',
-				required: true,
-				displayOptions: {
-					show: {
-						resource: ['notes'],
-						operation: ['createNote'],
-					},
-				},
-				placeholder: 'Category of note...',
-				description: 'Category of the Note',
-			},
-			// Tables Operations
-			{
-				displayName: 'Operation',
-				name: 'operation',
-				type: 'options',
-				noDataExpression: true,
-				displayOptions: {
-					show: {
-						resource: ['tables'],
-					},
-				},
-				options: [
-					{
-						name: 'Create Table',
-						value: 'createTable',
-						description: 'Create a new Table',
-					},
-					{
-						name: 'Get Tables',
-						value: 'getTables',
-						description: 'Retrieve all Tables',
-					},
-					{
-						name: 'Update Table',
-						value: 'updateTable',
-						description: 'Update an existing Table',
-					},
-					{
-						name: 'Delete Table',
-						value: 'deleteTable',
-						description: 'Delete a Table',
-					},
-				],
-				default: 'getTables',
-				description: 'The operation to perform.',
-			},
-			// Tables Fields
-			{
-				displayName: 'Table ID',
-				name: 'tableId',
-				type: 'string',
-				default: '',
-				required: true,
-				displayOptions: {
-					show: {
-						resource: ['tables'],
-						operation: ['updateTable', 'deleteTable'],
-					},
-				},
-				placeholder: 'ABCDE',
-				description: 'The ID of the Table',
-			},
-			{
-				displayName: 'Table Name',
-				name: 'tableName',
-				type: 'string',
-				default: '',
-				required: true,
-				displayOptions: {
-					show: {
-						resource: ['tables'],
-						operation: ['createTable', 'updateTable'],
-					},
-				},
-				placeholder: 'Project Tasks',
-				description: 'Name of the Table',
-			},
-			// Talk Operations
-			{
-				displayName: 'Operation',
-				name: 'operation',
-				type: 'options',
-				noDataExpression: true,
-				displayOptions: {
-					show: {
-						resource: ['talk'],
-					},
-				},
-				options: [
-					{
-						name: 'Send Message',
-						value: 'sendMessage',
-						description: 'Send a message in a conversation',
-					},
-					{
-						name: 'Get Conversations',
-						value: 'getConversations',
-						description: 'Retrieve all Conversations',
-					},
-					{
-						name: 'Create Conversation',
-						value: 'createConversation',
-						description: 'Create a new Conversation',
-					},
-					{
-						name: 'Delete Conversation',
-						value: 'deleteConversation',
-						description: 'Delete a Conversation',
-					},
-				],
-				default: 'getConversations',
-				description: 'The operation to perform.',
-			},
-			// Talk Fields
-			{
-				displayName: 'Conversation ID',
-				name: 'conversationId',
-				type: 'string',
-				default: '',
-				required: true,
-				displayOptions: {
-					show: {
-						resource: ['talk'],
-						operation: ['sendMessage', 'deleteConversation'],
-					},
-				},
-				placeholder: 'FGHIJ',
-				description: 'The ID of the Conversation',
-			},
-			{
-				displayName: 'Message',
-				name: 'message',
-				type: 'string',
-				default: '',
-				required: true,
-				displayOptions: {
-					show: {
-						resource: ['talk'],
-						operation: ['sendMessage'],
-					},
-				},
-				placeholder: 'Hello team!',
-				description: 'Message to send',
-			},
-			{
-				displayName: 'Conversation Name',
-				name: 'conversationName',
-				type: 'string',
-				default: '',
-				required: true,
-				displayOptions: {
-					show: {
-						resource: ['talk'],
-						operation: ['createConversation'],
-					},
-				},
-				placeholder: 'Team Chat',
-				description: 'Name of the Conversation',
 			},
 
 			// ----------------------------------
@@ -929,7 +566,7 @@ export class NextCloud implements INodeType {
 							},
 						},
 						default: '',
-						description: 'Optional password for public link',
+						description: 'Optional search string',
 					},
 					{
 						displayName: 'Permissions',
@@ -1325,10 +962,10 @@ export class NextCloud implements INodeType {
 
 						endpoint = 'ocs/v2.php/apps/files_sharing/api/v1/shares';
 
-						headers['OCS-APIRequest'] = 'true';
+						headers['OCS-APIRequest'] = true;
 						headers['Content-Type'] = 'application/x-www-form-urlencoded';
 
-						const bodyParameters = this.getNodeParameter('options', i) as IDataObject;
+						const bodyParameters = this.getNodeParameter('options', i);
 
 						bodyParameters.path = this.getNodeParameter('path', i) as string;
 						bodyParameters.shareType = this.getNodeParameter('shareType', i) as number;
@@ -1336,14 +973,15 @@ export class NextCloud implements INodeType {
 						if (bodyParameters.shareType === 0) {
 							bodyParameters.shareWith = this.getNodeParameter('user', i) as string;
 						} else if (bodyParameters.shareType === 7) {
-							bodyParameters.shareWith = this.getNodeParameter('circleId', i) as string;
+							bodyParameters.shareWith = this.getNodeParameter('circleId', i) as number;
 						} else if (bodyParameters.shareType === 4) {
 							bodyParameters.shareWith = this.getNodeParameter('email', i) as string;
 						} else if (bodyParameters.shareType === 1) {
-							bodyParameters.shareWith = this.getNodeParameter('groupId', i) as string;
+							bodyParameters.shareWith = this.getNodeParameter('groupId', i) as number;
 						}
 
-						body = new URLSearchParams(bodyParameters as any).toString();
+						// @ts-ignore
+						body = new URLSearchParams(bodyParameters).toString();
 					}
 				} else if (resource === 'user') {
 					if (operation === 'create') {
@@ -1355,18 +993,18 @@ export class NextCloud implements INodeType {
 
 						endpoint = 'ocs/v1.php/cloud/users';
 
-						headers['OCS-APIRequest'] = 'true';
+						headers['OCS-APIRequest'] = true;
 						headers['Content-Type'] = 'application/x-www-form-urlencoded';
 
 						const userid = this.getNodeParameter('userId', i) as string;
 						const email = this.getNodeParameter('email', i) as string;
 
-						body = `userid=${encodeURIComponent(userid)}&email=${encodeURIComponent(email)}`;
+						body = `userid=${userid}&email=${email}`;
 
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 
 						if (additionalFields.displayName) {
-							body += `&displayName=${encodeURIComponent(additionalFields.displayName as string)}`;
+							body += `&displayName=${additionalFields.displayName}`;
 						}
 					}
 					if (operation === 'delete') {
@@ -1377,9 +1015,9 @@ export class NextCloud implements INodeType {
 						requestMethod = 'DELETE';
 
 						const userid = this.getNodeParameter('userId', i) as string;
-						endpoint = `ocs/v1.php/cloud/users/${encodeURIComponent(userid)}`;
+						endpoint = `ocs/v1.php/cloud/users/${userid}`;
 
-						headers['OCS-APIRequest'] = 'true';
+						headers['OCS-APIRequest'] = true;
 						headers['Content-Type'] = 'application/x-www-form-urlencoded';
 					}
 					if (operation === 'get') {
@@ -1390,9 +1028,9 @@ export class NextCloud implements INodeType {
 						requestMethod = 'GET';
 
 						const userid = this.getNodeParameter('userId', i) as string;
-						endpoint = `ocs/v1.php/cloud/users/${encodeURIComponent(userid)}`;
+						endpoint = `ocs/v1.php/cloud/users/${userid}`;
 
-						headers['OCS-APIRequest'] = 'true';
+						headers['OCS-APIRequest'] = true;
 						headers['Content-Type'] = 'application/x-www-form-urlencoded';
 					}
 					if (operation === 'getAll') {
@@ -1401,14 +1039,14 @@ export class NextCloud implements INodeType {
 						// ----------------------------------
 
 						requestMethod = 'GET';
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
-						qs = this.getNodeParameter('options', i) as IDataObject;
+						const returnAll = this.getNodeParameter('returnAll', i);
+						qs = this.getNodeParameter('options', i);
 						if (!returnAll) {
-							qs.limit = this.getNodeParameter('limit', i) as number;
+							qs.limit = this.getNodeParameter('limit', i);
 						}
 						endpoint = 'ocs/v1.php/cloud/users';
 
-						headers['OCS-APIRequest'] = 'true';
+						headers['OCS-APIRequest'] = true;
 						headers['Content-Type'] = 'application/x-www-form-urlencoded';
 					}
 					if (operation === 'update') {
@@ -1419,335 +1057,17 @@ export class NextCloud implements INodeType {
 						requestMethod = 'PUT';
 
 						const userid = this.getNodeParameter('userId', i) as string;
-						endpoint = `ocs/v1.php/cloud/users/${encodeURIComponent(userid)}`;
+						endpoint = `ocs/v1.php/cloud/users/${userid}`;
 
-						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
-						const updateParams = updateFields.field as IDataObject;
-
-						body = Object.entries(updateParams)
-							.map(
-								([key, value]) =>
-									`${encodeURIComponent(key)}=${encodeURIComponent(value as string)}`,
-							)
+						body = Object.entries(this.getNodeParameter('updateFields', i).field as IDataObject)
+							.map((entry) => {
+								const [key, value] = entry;
+								return `${key}=${value}`;
+							})
 							.join('&');
 
-						headers['OCS-APIRequest'] = 'true';
+						headers['OCS-APIRequest'] = true;
 						headers['Content-Type'] = 'application/x-www-form-urlencoded';
-					}
-				} else if (resource === 'deck') {
-					switch (operation) {
-						case 'createBoard': {
-							const boardName = this.getNodeParameter('boardName', i) as string;
-							const boardColor = this.getNodeParameter('boardColor', i) as string;
-							const deckBody = {
-								title: boardName,
-								color: boardColor.replace('#', ''),
-							};
-							const deckHeaders = {
-								'OCS-APIRequest': 'true',
-								'Content-Type': 'application/json',
-							};
-							responseData = await nextCloudApiRequest.call(
-								this,
-								'POST',
-								'ocs/v2.php/apps/deck/api/v1.0/boards',
-								JSON.stringify(deckBody),
-								deckHeaders,
-							);
-							returnData.push(JSON.parse(responseData));
-							break;
-						}
-						case 'getBoards': {
-							const deckHeaders = {
-								'OCS-APIRequest': 'true',
-							};
-							responseData = await nextCloudApiRequest.call(
-								this,
-								'GET',
-								'ocs/v2.php/apps/deck/api/v1.0/boards',
-								'',
-								deckHeaders,
-							);
-							returnData.push(JSON.parse(responseData));
-							break;
-						}
-						case 'updateBoard': {
-							const boardId = this.getNodeParameter('boardId', i) as string;
-							const boardName = this.getNodeParameter('boardName', i) as string;
-							const boardColor = this.getNodeParameter('boardColor', i) as string;
-							const archivedBoard = this.getNodeParameter('archivedBoard', i) as boolean;
-							const deckBody = {
-								title: boardName,
-								color: boardColor.replace('#', ''),
-								archived: archivedBoard,
-							};
-							const deckHeaders = {
-								'OCS-APIRequest': 'true',
-								'Content-Type': 'application/json',
-							};
-							responseData = await nextCloudApiRequest.call(
-								this,
-								'PUT',
-								`ocs/v2.php/apps/deck/api/v1.0/boards/${encodeURIComponent(boardId)}`,
-								JSON.stringify(deckBody),
-								deckHeaders,
-							);
-							returnData.push(JSON.parse(responseData));
-							break;
-						}
-						case 'deleteBoard': {
-							const boardId = this.getNodeParameter('boardId', i) as string;
-							const deckHeaders = {
-								'OCS-APIRequest': 'true',
-							};
-							responseData = await nextCloudApiRequest.call(
-								this,
-								'DELETE',
-								`ocs/v2.php/apps/deck/api/v1.0/boards/${encodeURIComponent(boardId)}`,
-								'',
-								deckHeaders,
-							);
-							returnData.push({ json: { success: responseData === '' } });
-							break;
-						}
-						default:
-							throw new NodeOperationError(
-								this.getNode(),
-								`Operation "${operation}" not implemented for resource "deck"`,
-							);
-					}
-				} else if (resource === 'notes') {
-					switch (operation) {
-						case 'createNote': {
-							const content = this.getNodeParameter('content', i) as string;
-							const category = this.getNodeParameter('noteCategory', i) as string;
-							const title = this.getNodeParameter('noteTitle', i) as string;
-							const notesBody = { content, category, title };
-							const notesHeaders = {
-								'OCS-APIRequest': 'true',
-								'Content-Type': 'application/json',
-							};
-							responseData = await nextCloudApiRequest.call(
-								this,
-								'POST',
-								'ocs/v1.php/apps/notes/api/v1/notes',
-								JSON.stringify(notesBody),
-								notesHeaders,
-							);
-							returnData.push(JSON.parse(responseData));
-							break;
-						}
-						case 'getNotes': {
-							const notesHeaders = {
-								'OCS-APIRequest': 'true',
-							};
-							responseData = await nextCloudApiRequest.call(
-								this,
-								'GET',
-								'ocs/v1.php/apps/notes/api/v1/notes',
-								'',
-								notesHeaders,
-							);
-							returnData.push(JSON.parse(responseData));
-							break;
-						}
-						case 'getNote': {
-							const noteId = this.getNodeParameter('noteId', i) as string;
-							const notesHeaders = {
-								'OCS-APIRequest': 'true',
-							};
-							responseData = await nextCloudApiRequest.call(
-								this,
-								'GET',
-								`ocs/v1.php/apps/notes/api/v1/notes/${encodeURIComponent(noteId)}`,
-								'',
-								notesHeaders,
-							);
-							returnData.push(JSON.parse(responseData));
-							break;
-						}
-						case 'updateNote': {
-							const noteId = this.getNodeParameter('noteId', i) as string;
-							const content = this.getNodeParameter('content', i) as string;
-							const notesBody = { content };
-							const notesHeaders = {
-								'OCS-APIRequest': 'true',
-								'Content-Type': 'application/json',
-							};
-							responseData = await nextCloudApiRequest.call(
-								this,
-								'PUT',
-								`ocs/v1.php/apps/notes/api/v1/notes/${encodeURIComponent(noteId)}`,
-								JSON.stringify(notesBody),
-								notesHeaders,
-							);
-							returnData.push(JSON.parse(responseData));
-							break;
-						}
-						case 'deleteNote': {
-							const noteId = this.getNodeParameter('noteId', i) as string;
-							const notesHeaders = {
-								'OCS-APIRequest': 'true',
-							};
-							responseData = await nextCloudApiRequest.call(
-								this,
-								'DELETE',
-								`ocs/v1.php/apps/notes/api/v1/notes/${encodeURIComponent(noteId)}`,
-								'',
-								notesHeaders,
-							);
-							returnData.push({ json: { success: responseData === '' } });
-							break;
-						}
-						default:
-							throw new NodeOperationError(
-								this.getNode(),
-								`Operation "${operation}" not implemented for resource "notes"`,
-							);
-					}
-				} else if (resource === 'tables') {
-					switch (operation) {
-						case 'createTable': {
-							const tableName = this.getNodeParameter('tableName', i) as string;
-							const tablesBody = { name: tableName };
-							const tablesHeaders = {
-								'OCS-APIRequest': 'true',
-								'Content-Type': 'application/json',
-							};
-							responseData = await nextCloudApiRequest.call(
-								this,
-								'POST',
-								'ocs/v1.php/apps/tables/api/v1/tables',
-								JSON.stringify(tablesBody),
-								tablesHeaders,
-							);
-							returnData.push(JSON.parse(responseData));
-							break;
-						}
-						case 'getTables': {
-							const tablesHeaders = {
-								'OCS-APIRequest': 'true',
-							};
-							responseData = await nextCloudApiRequest.call(
-								this,
-								'GET',
-								'ocs/v1.php/apps/tables/api/v1/tables',
-								'',
-								tablesHeaders,
-							);
-							returnData.push(JSON.parse(responseData));
-							break;
-						}
-						case 'updateTable': {
-							const tableId = this.getNodeParameter('tableId', i) as string;
-							const tableName = this.getNodeParameter('tableName', i) as string;
-							const tablesBody = { name: tableName };
-							const tablesHeaders = {
-								'OCS-APIRequest': 'true',
-								'Content-Type': 'application/json',
-							};
-							responseData = await nextCloudApiRequest.call(
-								this,
-								'PUT',
-								`ocs/v1.php/apps/tables/api/v1/tables/${encodeURIComponent(tableId)}`,
-								JSON.stringify(tablesBody),
-								tablesHeaders,
-							);
-							returnData.push(JSON.parse(responseData));
-							break;
-						}
-						case 'deleteTable': {
-							const tableId = this.getNodeParameter('tableId', i) as string;
-							const tablesHeaders = {
-								'OCS-APIRequest': 'true',
-							};
-							responseData = await nextCloudApiRequest.call(
-								this,
-								'DELETE',
-								`ocs/v1.php/apps/tables/api/v1/tables/${encodeURIComponent(tableId)}`,
-								'',
-								tablesHeaders,
-							);
-							returnData.push({ json: { success: responseData === '' } });
-							break;
-						}
-						default:
-							throw new NodeOperationError(
-								this.getNode(),
-								`Operation "${operation}" not implemented for resource "tables"`,
-							);
-					}
-				} else if (resource === 'talk') {
-					switch (operation) {
-						case 'sendMessage': {
-							const conversationId = this.getNodeParameter('conversationId', i) as string;
-							const message = this.getNodeParameter('message', i) as string;
-							const talkBody = { message };
-							const talkHeaders = {
-								'OCS-APIRequest': 'true',
-								'Content-Type': 'application/json',
-							};
-							responseData = await nextCloudApiRequest.call(
-								this,
-								'POST',
-								`ocs/v1.php/apps/talk/api/v1/messages/${encodeURIComponent(conversationId)}`,
-								JSON.stringify(talkBody),
-								talkHeaders,
-							);
-							returnData.push(JSON.parse(responseData));
-							break;
-						}
-						case 'getConversations': {
-							const talkHeaders = {
-								'OCS-APIRequest': 'true',
-							};
-							responseData = await nextCloudApiRequest.call(
-								this,
-								'GET',
-								'ocs/v1.php/apps/talk/api/v1/conversations',
-								'',
-								talkHeaders,
-							);
-							returnData.push(JSON.parse(responseData));
-							break;
-						}
-						case 'createConversation': {
-							const conversationName = this.getNodeParameter('conversationName', i) as string;
-							const talkBody = { name: conversationName };
-							const talkHeaders = {
-								'OCS-APIRequest': 'true',
-								'Content-Type': 'application/json',
-							};
-							responseData = await nextCloudApiRequest.call(
-								this,
-								'POST',
-								'ocs/v1.php/apps/talk/api/v1/conversations',
-								JSON.stringify(talkBody),
-								talkHeaders,
-							);
-							returnData.push(JSON.parse(responseData));
-							break;
-						}
-						case 'deleteConversation': {
-							const conversationId = this.getNodeParameter('conversationId', i) as string;
-							const talkHeaders = {
-								'OCS-APIRequest': 'true',
-							};
-							responseData = await nextCloudApiRequest.call(
-								this,
-								'DELETE',
-								`ocs/v1.php/apps/talk/api/v1/conversations/${encodeURIComponent(conversationId)}`,
-								'',
-								talkHeaders,
-							);
-							returnData.push({ json: { success: responseData === '' } });
-							break;
-						}
-						default:
-							throw new NodeOperationError(
-								this.getNode(),
-								`Operation "${operation}" not implemented for resource "talk"`,
-							);
 					}
 				} else {
 					throw new NodeOperationError(this.getNode(), `The resource "${resource}" is not known!`, {
@@ -1764,6 +1084,7 @@ export class NextCloud implements INodeType {
 
 				let encoding = undefined;
 				if (resource === 'file' && operation === 'download') {
+					// Return the data as a buffer
 					encoding = null;
 				}
 
@@ -1798,6 +1119,9 @@ export class NextCloud implements INodeType {
 					};
 
 					if (items[i].binary !== undefined) {
+						// Create a shallow copy of the binary data so that the old
+						// data references which do not get changed still stay behind
+						// but the incoming data does not get changed.
 						Object.assign(newItem.binary as IBinaryKeyData, items[i].binary);
 					}
 
@@ -1810,6 +1134,7 @@ export class NextCloud implements INodeType {
 						endpoint,
 					);
 				} else if (['file', 'folder'].includes(resource) && operation === 'share') {
+					// eslint-disable-next-line @typescript-eslint/no-loop-func
 					const jsonResponseData: IDataObject = await new Promise((resolve, reject) => {
 						parseString(responseData as string, { explicitArray: false }, (err, data) => {
 							if (err) {
@@ -1837,6 +1162,7 @@ export class NextCloud implements INodeType {
 					returnData.push(...executionData);
 				} else if (resource === 'user') {
 					if (operation !== 'getAll') {
+						// eslint-disable-next-line @typescript-eslint/no-loop-func
 						const jsonResponseData: IDataObject = await new Promise((resolve, reject) => {
 							parseString(responseData as string, { explicitArray: false }, (err, data) => {
 								if (err) {
@@ -1867,6 +1193,7 @@ export class NextCloud implements INodeType {
 
 						returnData.push(...executionData);
 					} else {
+						// eslint-disable-next-line @typescript-eslint/no-loop-func
 						const jsonResponseData: IDataObject[] = await new Promise((resolve, reject) => {
 							parseString(responseData as string, { explicitArray: false }, (err, data) => {
 								if (err) {
@@ -1892,6 +1219,7 @@ export class NextCloud implements INodeType {
 						});
 					}
 				} else if (resource === 'folder' && operation === 'list') {
+					// eslint-disable-next-line @typescript-eslint/no-loop-func
 					const jsonResponseData: IDataObject = await new Promise((resolve, reject) => {
 						parseString(responseData as string, { explicitArray: false }, (err, data) => {
 							if (err) {
@@ -1924,7 +1252,7 @@ export class NextCloud implements INodeType {
 								}
 								const newItem: IDataObject = {};
 
-								newItem.path = decodeURIComponent(item['d:href']).replace(/^\//, '');
+								newItem.path = item['d:href'].slice(19);
 
 								let props: IDataObject = {};
 								if (Array.isArray(item['d:propstat'])) {
@@ -1933,6 +1261,7 @@ export class NextCloud implements INodeType {
 									props = item['d:propstat']['d:prop'] as IDataObject;
 								}
 
+								// Get the props and save them under a proper name
 								for (const propName of Object.keys(propNames)) {
 									if (props[propName] !== undefined) {
 										newItem[propNames[propName]] = props[propName];
@@ -1972,8 +1301,10 @@ export class NextCloud implements INodeType {
 		}
 
 		if (resource === 'file' && operation === 'download') {
+			// For file downloads the files get attached to the existing items
 			return [items];
 		} else {
+			// For all other ones does the output get replaced
 			return [returnData];
 		}
 	}
