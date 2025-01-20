@@ -51,10 +51,8 @@ describe('ProjectSettings', () => {
 		settingsStore = useSettingsStore();
 
 		vi.spyOn(usersStore, 'fetchUsers').mockImplementation(async () => await Promise.resolve());
-		vi.spyOn(projectsStore, 'getAllProjects').mockImplementation(
-			async () => await Promise.resolve(),
-		);
-		vi.spyOn(projectsStore, 'projects', 'get').mockReturnValue(projects);
+		vi.spyOn(projectsStore, 'getAvailableProjects').mockImplementation(async () => {});
+		vi.spyOn(projectsStore, 'availableProjects', 'get').mockReturnValue(projects);
 		vi.spyOn(settingsStore, 'settings', 'get').mockReturnValue({
 			enterprise: {
 				projects: {
@@ -68,6 +66,7 @@ describe('ProjectSettings', () => {
 			id: '123',
 			type: 'team',
 			name: 'Test Project',
+			icon: { type: 'icon', value: 'folder' },
 			relations: [],
 			createdAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),

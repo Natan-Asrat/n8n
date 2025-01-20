@@ -1,32 +1,32 @@
 import type {
-	INodeUi,
-	IUsedCredential,
 	ICredentialMap,
 	ICredentialsDecryptedResponse,
 	ICredentialsResponse,
 	ICredentialsState,
 	ICredentialTypeMap,
+	INodeUi,
+	IUsedCredential,
 } from '@/Interface';
 import * as credentialsApi from '@/api/credentials';
 import * as credentialsEeApi from '@/api/credentials.ee';
-import { makeRestApiRequest } from '@/utils/apiUtils';
-import { getAppNameFromCredType } from '@/utils/nodeTypesUtils';
 import { EnterpriseEditionFeature, STORES } from '@/constants';
 import { i18n } from '@/plugins/i18n';
+import type { ProjectSharingData } from '@/types/projects.types';
+import { makeRestApiRequest } from '@/utils/apiUtils';
+import { getAppNameFromCredType } from '@/utils/nodeTypesUtils';
+import { splitName } from '@/utils/projects.utils';
+import { isEmpty, isPresent } from '@/utils/typesUtils';
 import type {
 	ICredentialsDecrypted,
 	ICredentialType,
 	INodeCredentialTestResult,
-	INodeTypeDescription,
 } from 'n8n-workflow';
 import { defineStore } from 'pinia';
-import { useRootStore } from './root.store';
-import { useNodeTypesStore } from './nodeTypes.store';
-import { useSettingsStore } from './settings.store';
-import { isEmpty } from '@/utils/typesUtils';
-import type { ProjectSharingData } from '@/types/projects.types';
-import { splitName } from '@/utils/projects.utils';
 import { computed, ref } from 'vue';
+import { useNodeTypesStore } from './nodeTypes.store';
+import { useRootStore } from './root.store';
+import { useSettingsStore } from './settings.store';
+import * as aiApi from '@/api/ai';
 
 const DEFAULT_CREDENTIAL_NAME = 'Unnamed credential';
 const DEFAULT_CREDENTIAL_POSTFIX = 'account';
@@ -36,6 +36,8 @@ export type CredentialsStore = ReturnType<typeof useCredentialsStore>;
 
 export const useCredentialsStore = defineStore(STORES.CREDENTIALS, () => {
 	const state = ref<ICredentialsState>({ credentialTypes: {}, credentials: {} });
+
+	const rootStore = useRootStore();
 
 	// ---------------------------------------------------------------------------
 	// #region Computed
@@ -131,22 +133,15 @@ export const useCredentialsStore = defineStore(STORES.CREDENTIALS, () => {
 
 	const getNodesWithAccess = computed(() => {
 		return (credentialTypeName: string) => {
+			const credentialType = getCredentialTypeByName.value(credentialTypeName);
+			if (!credentialType) {
+				return [];
+			}
 			const nodeTypesStore = useNodeTypesStore();
-			const allNodeTypes: INodeTypeDescription[] = nodeTypesStore.allNodeTypes;
 
-			return allNodeTypes.filter((nodeType: INodeTypeDescription) => {
-				if (!nodeType.credentials) {
-					return false;
-				}
-
-				for (const credentialTypeDescription of nodeType.credentials) {
-					if (credentialTypeDescription.name === credentialTypeName) {
-						return true;
-					}
-				}
-
-				return false;
-			});
+			return (credentialType.supportedNodes ?? [])
+				.map((nodeType) => nodeTypesStore.getNodeType(nodeType))
+				.filter(isPresent);
 		};
 	});
 
@@ -260,7 +255,6 @@ export const useCredentialsStore = defineStore(STORES.CREDENTIALS, () => {
 		if (allCredentialTypes.value.length > 0 && !forceFetch) {
 			return;
 		}
-		const rootStore = useRootStore();
 		const credentialTypes = await credentialsApi.getCredentialTypes(rootStore.baseUrl);
 		setCredentialTypes(credentialTypes);
 	};
@@ -269,8 +263,6 @@ export const useCredentialsStore = defineStore(STORES.CREDENTIALS, () => {
 		projectId?: string,
 		includeScopes = true,
 	): Promise<ICredentialsResponse[]> => {
-		const rootStore = useRootStore();
-
 		const filter = {
 			projectId,
 		};
@@ -287,8 +279,6 @@ export const useCredentialsStore = defineStore(STORES.CREDENTIALS, () => {
 	const fetchAllCredentialsForWorkflow = async (
 		options: { workflowId: string } | { projectId: string },
 	): Promise<ICredentialsResponse[]> => {
-		const rootStore = useRootStore();
-
 		const credentials = await credentialsApi.getAllCredentialsForWorkflow(
 			rootStore.restApiContext,
 			options,
@@ -302,7 +292,6 @@ export const useCredentialsStore = defineStore(STORES.CREDENTIALS, () => {
 	}: {
 		id: string;
 	}): Promise<ICredentialsResponse | ICredentialsDecryptedResponse | undefined> => {
-		const rootStore = useRootStore();
 		return await credentialsApi.getCredentialData(rootStore.restApiContext, id);
 	};
 
@@ -310,7 +299,6 @@ export const useCredentialsStore = defineStore(STORES.CREDENTIALS, () => {
 		data: ICredentialsDecrypted,
 		projectId?: string,
 	): Promise<ICredentialsResponse> => {
-		const rootStore = useRootStore();
 		const settingsStore = useSettingsStore();
 		const credential = await credentialsApi.createNewCredential(
 			rootStore.restApiContext,
@@ -341,7 +329,6 @@ export const useCredentialsStore = defineStore(STORES.CREDENTIALS, () => {
 		id: string;
 	}): Promise<ICredentialsResponse> => {
 		const { id, data } = params;
-		const rootStore = useRootStore();
 		const credential = await credentialsApi.updateCredential(rootStore.restApiContext, id, data);
 
 		upsertCredential(credential);
@@ -350,7 +337,6 @@ export const useCredentialsStore = defineStore(STORES.CREDENTIALS, () => {
 	};
 
 	const deleteCredential = async ({ id }: { id: string }) => {
-		const rootStore = useRootStore();
 		const deleted = await credentialsApi.deleteCredential(rootStore.restApiContext, id);
 		if (deleted) {
 			const { [id]: deletedCredential, ...rest } = state.value.credentials;
@@ -359,19 +345,16 @@ export const useCredentialsStore = defineStore(STORES.CREDENTIALS, () => {
 	};
 
 	const oAuth2Authorize = async (data: ICredentialsResponse): Promise<string> => {
-		const rootStore = useRootStore();
 		return await credentialsApi.oAuth2CredentialAuthorize(rootStore.restApiContext, data);
 	};
 
 	const oAuth1Authorize = async (data: ICredentialsResponse): Promise<string> => {
-		const rootStore = useRootStore();
 		return await credentialsApi.oAuth1CredentialAuthorize(rootStore.restApiContext, data);
 	};
 
 	const testCredential = async (
 		data: ICredentialsDecrypted,
 	): Promise<INodeCredentialTestResult> => {
-		const rootStore = useRootStore();
 		return await credentialsApi.testCredential(rootStore.restApiContext, { credentials: data });
 	};
 
@@ -385,7 +368,6 @@ export const useCredentialsStore = defineStore(STORES.CREDENTIALS, () => {
 				newName =
 					newName.length > 0 ? `${newName} ${DEFAULT_CREDENTIAL_POSTFIX}` : DEFAULT_CREDENTIAL_NAME;
 			}
-			const rootStore = useRootStore();
 			const res = await credentialsApi.getCredentialsNewName(rootStore.restApiContext, newName);
 			return res.name;
 		} catch (e) {
@@ -415,10 +397,17 @@ export const useCredentialsStore = defineStore(STORES.CREDENTIALS, () => {
 	};
 
 	const getCredentialTranslation = async (credentialType: string): Promise<object> => {
-		const rootStore = useRootStore();
 		return await makeRestApiRequest(rootStore.restApiContext, 'GET', '/credential-translation', {
 			credentialType,
 		});
+	};
+
+	const claimFreeAiCredits = async (projectId?: string): Promise<ICredentialsResponse> => {
+		const credential = await aiApi.claimFreeAiCredits(rootStore.restApiContext, {
+			projectId,
+		});
+		upsertCredential(credential);
+		return credential;
 	};
 
 	// #endregion
@@ -457,6 +446,7 @@ export const useCredentialsStore = defineStore(STORES.CREDENTIALS, () => {
 		testCredential,
 		getCredentialTranslation,
 		setCredentialSharedWith,
+		claimFreeAiCredits,
 	};
 });
 

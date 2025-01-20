@@ -40,7 +40,10 @@ type EndpointGroup =
 	| 'debug'
 	| 'project'
 	| 'role'
-	| 'dynamic-node-parameters';
+	| 'dynamic-node-parameters'
+	| 'apiKeys'
+	| 'evaluation'
+	| 'ai';
 
 export interface SetupProps {
 	endpointGroups?: EndpointGroup[];
@@ -55,6 +58,8 @@ export interface TestServer {
 	httpServer: Server;
 	authAgentFor: (user: User) => TestAgent;
 	publicApiAgentFor: (user: User) => TestAgent;
+	publicApiAgentWithApiKey: (apiKey: string) => TestAgent;
+	publicApiAgentWithoutApiKey: () => TestAgent;
 	authlessAgent: TestAgent;
 	restlessAgent: TestAgent;
 	license: LicenseMocker;
@@ -64,6 +69,7 @@ export type CredentialPayload = {
 	name: string;
 	type: string;
 	data: ICredentialDataDecryptedObject;
+	isManaged?: boolean;
 };
 
 export type SaveCredentialFunction = (

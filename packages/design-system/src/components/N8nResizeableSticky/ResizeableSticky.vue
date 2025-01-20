@@ -1,7 +1,9 @@
 <script lang="ts" setup>
 import { computed, ref, useAttrs } from 'vue';
 
-import N8nResizeWrapper, { type ResizeData } from '../N8nResizeWrapper/ResizeWrapper.vue';
+import { type ResizeData } from 'n8n-design-system/types';
+
+import N8nResizeWrapper from '../N8nResizeWrapper/ResizeWrapper.vue';
 import { defaultStickyProps } from '../N8nSticky/constants';
 import N8nSticky from '../N8nSticky/Sticky.vue';
 import type { StickyProps } from '../N8nSticky/types';
@@ -21,6 +23,7 @@ const emit = defineEmits<{
 	resize: [values: ResizeData];
 	resizestart: [];
 	resizeend: [];
+	'markdown-click': [link: HTMLAnchorElement, e: MouseEvent];
 }>();
 
 const attrs = useAttrs();
@@ -42,6 +45,10 @@ const onResizeEnd = () => {
 	isResizing.value = false;
 	emit('resizeend');
 };
+
+const onMarkdownClick = (link: HTMLAnchorElement, event: MouseEvent) => {
+	emit('markdown-click', link, event);
+};
 </script>
 
 <template>
@@ -57,6 +64,6 @@ const onResizeEnd = () => {
 		@resize="onResize"
 		@resizestart="onResizeStart"
 	>
-		<N8nSticky v-bind="stickyBindings" />
+		<N8nSticky v-bind="stickyBindings" @markdown-click="onMarkdownClick" />
 	</N8nResizeWrapper>
 </template>

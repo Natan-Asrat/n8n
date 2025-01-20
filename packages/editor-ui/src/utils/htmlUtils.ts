@@ -18,8 +18,8 @@ export function sanitizeHtml(dirtyHtml: string) {
 			}
 
 			if (ALLOWED_HTML_ATTRIBUTES.includes(name) || name.startsWith('data-')) {
-				// href is allowed but we need to sanitize certain protocols
-				if (name === 'href' && !value.match(/^https?:\/\//gm)) {
+				// href is allowed but we allow only https and relative URLs
+				if (name === 'href' && !value.match(/^https?:\/\//gm) && !value.startsWith('/')) {
 					return '';
 				}
 				return `${name}="${escapeAttrValue(value)}"`;
@@ -47,10 +47,6 @@ export const sanitizeIfString = <T>(message: T): string | T => {
 	}
 	return message;
 };
-
-export function setPageTitle(title: string) {
-	window.document.title = title;
-}
 
 export function convertRemToPixels(rem: string) {
 	return parseInt(rem, 10) * parseFloat(getComputedStyle(document.documentElement).fontSize);

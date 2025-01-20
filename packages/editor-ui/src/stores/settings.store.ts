@@ -3,6 +3,7 @@ import Bowser from 'bowser';
 import type { IUserManagementSettings, FrontendSettings } from '@n8n/api-types';
 
 import * as publicApiApi from '@/api/api-keys';
+import * as eventsApi from '@/api/events';
 import * as ldapApi from '@/api/ldap';
 import * as settingsApi from '@/api/settings';
 import { testHealthEndpoint } from '@/api/templates';
@@ -17,7 +18,6 @@ import { useUIStore } from './ui.store';
 import { useUsersStore } from './users.store';
 import { useVersionsStore } from './versions.store';
 import { makeRestApiRequest } from '@/utils/apiUtils';
-import { useTitleChange } from '@/composables/useTitleChange';
 import { useToast } from '@/composables/useToast';
 import { i18n } from '@/plugins/i18n';
 
@@ -70,6 +70,8 @@ export const useSettingsStore = defineStore(STORES.SETTINGS, () => {
 
 	const concurrency = computed(() => settings.value.concurrency);
 
+	const isConcurrencyEnabled = computed(() => concurrency.value !== -1);
+
 	const isPublicApiEnabled = computed(() => api.value.enabled);
 
 	const isSwaggerUIEnabled = computed(() => api.value.swaggerUi.enabled);
@@ -88,11 +90,17 @@ export const useSettingsStore = defineStore(STORES.SETTINGS, () => {
 
 	const isAiAssistantEnabled = computed(() => settings.value.aiAssistant?.enabled);
 
+	const isAskAiEnabled = computed(() => settings.value.askAi?.enabled);
+
 	const showSetupPage = computed(() => userManagement.value.showSetupOnFirstLoad);
 
 	const deploymentType = computed(() => settings.value.deployment?.type || 'default');
 
 	const isCloudDeployment = computed(() => settings.value.deployment?.type === 'cloud');
+
+	const isAiCreditsEnabled = computed(() => settings.value.aiCredits?.enabled);
+
+	const aiCreditsQuota = computed(() => settings.value.aiCredits?.credits);
 
 	const isSmtpSetup = computed(() => userManagement.value.smtpSetup);
 
@@ -145,7 +153,7 @@ export const useSettingsStore = defineStore(STORES.SETTINGS, () => {
 	const permanentlyDismissedBanners = computed(() => settings.value.banners?.dismissed ?? []);
 
 	const isBelowUserQuota = computed(
-		() =>
+		(): boolean =>
 			userManagement.value.quota === -1 ||
 			userManagement.value.quota > useUsersStore().allUsers.length,
 	);
@@ -153,6 +161,10 @@ export const useSettingsStore = defineStore(STORES.SETTINGS, () => {
 	const isCommunityPlan = computed(() => planName.value.toLowerCase() === 'community');
 
 	const isDevRelease = computed(() => settings.value.releaseChannel === 'dev');
+
+	const isCanvasV2Enabled = computed(() =>
+		(settings.value.betaFeatures ?? []).includes('canvas_v2'),
+	);
 
 	const setSettings = (newSettings: FrontendSettings) => {
 		settings.value = newSettings;
@@ -236,6 +248,7 @@ export const useSettingsStore = defineStore(STORES.SETTINGS, () => {
 		rootStore.setEndpointFormWaiting(fetchedSettings.endpointFormWaiting);
 		rootStore.setEndpointWebhook(fetchedSettings.endpointWebhook);
 		rootStore.setEndpointWebhookTest(fetchedSettings.endpointWebhookTest);
+		rootStore.setEndpointWebhookWaiting(fetchedSettings.endpointWebhookWaiting);
 		rootStore.setTimezone(fetchedSettings.timezone);
 		rootStore.setExecutionTimeout(fetchedSettings.executionTimeout);
 		rootStore.setMaxExecutionTimeout(fetchedSettings.maxExecutionTimeout);
@@ -245,6 +258,10 @@ export const useSettingsStore = defineStore(STORES.SETTINGS, () => {
 		rootStore.setDefaultLocale(fetchedSettings.defaultLocale);
 		rootStore.setBinaryDataMode(fetchedSettings.binaryDataMode);
 		useVersionsStore().setVersionNotificationSettings(fetchedSettings.versionNotifications);
+
+		if (fetchedSettings.telemetry.enabled) {
+			void eventsApi.sessionStarted(rootStore.restApiContext);
+		}
 	};
 
 	const initialize = async () => {
@@ -258,9 +275,6 @@ export const useSettingsStore = defineStore(STORES.SETTINGS, () => {
 
 			ExpressionEvaluatorProxy.setEvaluator(settings.value.expressions.evaluator);
 
-			// Re-compute title since settings are now available
-			useTitleChange().titleReset();
-
 			initialized.value = true;
 		} catch (e) {
 			showToast({
@@ -268,7 +282,6 @@ export const useSettingsStore = defineStore(STORES.SETTINGS, () => {
 				message: i18n.baseText('startupError.message'),
 				type: 'error',
 				duration: 0,
-				dangerouslyUseHTMLString: true,
 			});
 
 			throw e;
@@ -308,21 +321,19 @@ export const useSettingsStore = defineStore(STORES.SETTINGS, () => {
 		templatesEndpointHealthy.value = true;
 	};
 
-	const getApiKey = async () => {
+	const getApiKeys = async () => {
 		const rootStore = useRootStore();
-		const { apiKey } = await publicApiApi.getApiKey(rootStore.restApiContext);
-		return apiKey;
+		return await publicApiApi.getApiKeys(rootStore.restApiContext);
 	};
 
 	const createApiKey = async () => {
 		const rootStore = useRootStore();
-		const { apiKey } = await publicApiApi.createApiKey(rootStore.restApiContext);
-		return apiKey;
+		return await publicApiApi.createApiKey(rootStore.restApiContext);
 	};
 
-	const deleteApiKey = async () => {
+	const deleteApiKey = async (id: string) => {
 		const rootStore = useRootStore();
-		await publicApiApi.deleteApiKey(rootStore.restApiContext);
+		await publicApiApi.deleteApiKey(rootStore.restApiContext, id);
 	};
 
 	const getLdapConfig = async () => {
@@ -378,6 +389,7 @@ export const useSettingsStore = defineStore(STORES.SETTINGS, () => {
 		security,
 		nodeJsVersion,
 		concurrency,
+		isConcurrencyEnabled,
 		isPublicApiEnabled,
 		isSwaggerUIEnabled,
 		isPreviewMode,
@@ -415,6 +427,10 @@ export const useSettingsStore = defineStore(STORES.SETTINGS, () => {
 		saveManualExecutions,
 		saveDataProgressExecution,
 		isCommunityPlan,
+		isAskAiEnabled,
+		isCanvasV2Enabled,
+		isAiCreditsEnabled,
+		aiCreditsQuota,
 		reset,
 		testLdapConnection,
 		getLdapConfig,
@@ -423,7 +439,7 @@ export const useSettingsStore = defineStore(STORES.SETTINGS, () => {
 		runLdapSync,
 		getTimezones,
 		createApiKey,
-		getApiKey,
+		getApiKeys,
 		deleteApiKey,
 		testTemplatesEndpoint,
 		submitContactInfo,

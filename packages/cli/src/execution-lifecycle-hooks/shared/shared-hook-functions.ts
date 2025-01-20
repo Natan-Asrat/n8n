@@ -1,10 +1,10 @@
+import { Container } from '@n8n/di';
 import pick from 'lodash/pick';
-import type { ExecutionStatus, IRun, IWorkflowBase } from 'n8n-workflow';
-import { Container } from 'typedi';
+import { Logger } from 'n8n-core';
+import { ensureError, type ExecutionStatus, type IRun, type IWorkflowBase } from 'n8n-workflow';
 
 import { ExecutionRepository } from '@/databases/repositories/execution.repository';
-import type { ExecutionPayload, IExecutionDb } from '@/interfaces';
-import { Logger } from '@/logger';
+import type { IExecutionDb, UpdateExecutionPayload } from '@/interfaces';
 import { ExecutionMetadataService } from '@/services/execution-metadata.service';
 import { isWorkflowIdValid } from '@/utils';
 
@@ -46,7 +46,7 @@ export function prepareExecutionDataForDbUpdate(parameters: {
 		'pinData',
 	]);
 
-	const fullExecutionData: ExecutionPayload = {
+	const fullExecutionData: UpdateExecutionPayload = {
 		data: runData.data,
 		mode: runData.mode,
 		finished: runData.finished ? runData.finished : false,
@@ -95,7 +95,8 @@ export async function updateExistingExecution(parameters: {
 			);
 		}
 	} catch (e) {
-		logger.error(`Failed to save metadata for execution ID ${executionId}`, e as Error);
+		const error = ensureError(e);
+		logger.error(`Failed to save metadata for execution ID ${executionId}`, { error });
 	}
 
 	if (executionData.finished === true && executionData.retryOf !== undefined) {

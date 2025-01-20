@@ -1,5 +1,8 @@
 import type { IExecuteFunctions, IDataObject, INodeExecutionData } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
+
+import { cellFormat, handlingExtraData, locationDefine } from './commonDescription';
+import type { GoogleSheet } from '../../helpers/GoogleSheet';
 import {
 	ROW_NUMBER,
 	type ISheetUpdateData,
@@ -7,9 +10,7 @@ import {
 	type ValueInputOption,
 	type ValueRenderOption,
 } from '../../helpers/GoogleSheets.types';
-import type { GoogleSheet } from '../../helpers/GoogleSheet';
 import { cellFormatDefault, untilSheetSelected } from '../../helpers/GoogleSheets.utils';
-import { cellFormat, handlingExtraData, locationDefine } from './commonDescription';
 
 export const description: SheetProperties = [
 	{
@@ -307,11 +308,11 @@ export async function execute(
 			if (handlingExtraDataOption === 'ignoreIt') {
 				inputData.push(items[i].json);
 			}
-			if (handlingExtraDataOption === 'error' && columnsToMatchOn[0] !== 'row_number') {
+			if (handlingExtraDataOption === 'error') {
 				Object.keys(items[i].json).forEach((key) => errorOnUnexpectedColumn(key, i));
 				inputData.push(items[i].json);
 			}
-			if (handlingExtraDataOption === 'insertInNewColumn' && columnsToMatchOn[0] !== 'row_number') {
+			if (handlingExtraDataOption === 'insertInNewColumn') {
 				Object.keys(items[i].json).forEach(addNewColumn);
 				inputData.push(items[i].json);
 			}

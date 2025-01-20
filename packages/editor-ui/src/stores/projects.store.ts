@@ -5,13 +5,7 @@ import { useRootStore } from '@/stores/root.store';
 import * as projectsApi from '@/api/projects.api';
 import * as workflowsEEApi from '@/api/workflows.ee';
 import * as credentialsEEApi from '@/api/credentials.ee';
-import type {
-	Project,
-	ProjectCreateRequest,
-	ProjectListItem,
-	ProjectUpdateRequest,
-	ProjectsCount,
-} from '@/types/projects.types';
+import type { Project, ProjectListItem, ProjectsCount } from '@/types/projects.types';
 import { ProjectTypes } from '@/types/projects.types';
 import { useSettingsStore } from '@/stores/settings.store';
 import { hasPermission } from '@/utils/rbac/permissions';
@@ -19,6 +13,9 @@ import type { IWorkflowDb } from '@/Interface';
 import { useWorkflowsStore } from '@/stores/workflows.store';
 import { useCredentialsStore } from '@/stores/credentials.store';
 import { STORES } from '@/constants';
+import { useUsersStore } from '@/stores/users.store';
+import { getResourcePermissions } from '@/permissions';
+import type { CreateProjectDto, UpdateProjectDto } from '@n8n/api-types';
 
 export const useProjectsStore = defineStore(STORES.PROJECTS, () => {
 	const route = useRoute();
@@ -26,6 +23,7 @@ export const useProjectsStore = defineStore(STORES.PROJECTS, () => {
 	const settingsStore = useSettingsStore();
 	const workflowsStore = useWorkflowsStore();
 	const credentialsStore = useCredentialsStore();
+	const usersStore = useUsersStore();
 
 	const projects = ref<ProjectListItem[]>([]);
 	const myProjects = ref<ProjectListItem[]>([]);
@@ -37,6 +35,13 @@ export const useProjectsStore = defineStore(STORES.PROJECTS, () => {
 		public: 0,
 	});
 	const projectNavActiveIdState = ref<string | string[] | null>(null);
+
+	const globalProjectPermissions = computed(
+		() => getResourcePermissions(usersStore.currentUser?.globalScopes).project,
+	);
+	const availableProjects = computed(() =>
+		globalProjectPermissions.value.list ? projects.value : myProjects.value,
+	);
 
 	const currentProjectId = computed(
 		() =>
@@ -50,12 +55,8 @@ export const useProjectsStore = defineStore(STORES.PROJECTS, () => {
 	);
 	const teamProjects = computed(() => projects.value.filter((p) => p.type === ProjectTypes.Team));
 	const teamProjectsLimit = computed(() => settingsStore.settings.enterprise.projects.team.limit);
-	const isTeamProjectFeatureEnabled = computed<boolean>(
-		() => settingsStore.settings.enterprise.projects.team.limit !== 0,
-	);
-	const hasUnlimitedProjects = computed<boolean>(
-		() => settingsStore.settings.enterprise.projects.team.limit === -1,
-	);
+	const isTeamProjectFeatureEnabled = computed<boolean>(() => teamProjectsLimit.value !== 0);
+	const hasUnlimitedProjects = computed<boolean>(() => teamProjectsLimit.value === -1);
 	const isTeamProjectLimitExceeded = computed<boolean>(
 		() => projectsCount.value.team >= teamProjectsLimit.value,
 	);
@@ -91,6 +92,14 @@ export const useProjectsStore = defineStore(STORES.PROJECTS, () => {
 		personalProject.value = await projectsApi.getPersonalProject(rootStore.restApiContext);
 	};
 
+	const getAvailableProjects = async () => {
+		if (globalProjectPermissions.value.list) {
+			await getAllProjects();
+		} else {
+			await getMyProjects();
+		}
+	};
+
 	const fetchProject = async (id: string) =>
 		await projectsApi.getProject(rootStore.restApiContext, id);
 
@@ -98,24 +107,30 @@ export const useProjectsStore = defineStore(STORES.PROJECTS, () => {
 		currentProject.value = await fetchProject(id);
 	};
 
-	const createProject = async (project: ProjectCreateRequest): Promise<Project> => {
+	const createProject = async (project: CreateProjectDto): Promise<Project> => {
 		const newProject = await projectsApi.createProject(rootStore.restApiContext, project);
 		await getProjectsCount();
 		myProjects.value = [...myProjects.value, newProject as unknown as ProjectListItem];
 		return newProject;
 	};
 
-	const updateProject = async (projectData: ProjectUpdateRequest): Promise<void> => {
-		await projectsApi.updateProject(rootStore.restApiContext, projectData);
-		const projectIndex = myProjects.value.findIndex((p) => p.id === projectData.id);
+	const updateProject = async (
+		id: Project['id'],
+		projectData: Required<UpdateProjectDto>,
+	): Promise<void> => {
+		await projectsApi.updateProject(rootStore.restApiContext, id, projectData);
+		const projectIndex = myProjects.value.findIndex((p) => p.id === id);
+		const { name, icon } = projectData;
 		if (projectIndex !== -1) {
-			myProjects.value[projectIndex].name = projectData.name;
+			myProjects.value[projectIndex].name = name;
+			myProjects.value[projectIndex].icon = icon;
 		}
 		if (currentProject.value) {
-			currentProject.value.name = projectData.name;
+			currentProject.value.name = name;
+			currentProject.value.icon = icon;
 		}
 		if (projectData.relations) {
-			await getProject(projectData.id);
+			await getProject(id);
 		}
 	};
 
@@ -189,6 +204,7 @@ export const useProjectsStore = defineStore(STORES.PROJECTS, () => {
 
 	return {
 		projects,
+		availableProjects,
 		myProjects,
 		personalProject,
 		currentProject,
@@ -206,6 +222,7 @@ export const useProjectsStore = defineStore(STORES.PROJECTS, () => {
 		getAllProjects,
 		getMyProjects,
 		getPersonalProject,
+		getAvailableProjects,
 		fetchProject,
 		getProject,
 		createProject,

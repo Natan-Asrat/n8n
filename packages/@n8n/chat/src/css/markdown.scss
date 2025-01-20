@@ -1,4 +1,20 @@
-@import 'highlight.js/styles/github.css';
+@use 'sass:meta';
+
+@include meta.load-css('highlight.js/styles/github.css');
+
+@mixin hljs-dark-theme {
+	@include meta.load-css('highlight.js/styles/github-dark-dimmed.css');
+}
+
+body {
+	&[data-theme='dark'] {
+		@include hljs-dark-theme;
+	}
+
+	@media (prefers-color-scheme: dark) {
+		@include hljs-dark-theme;
+	}
+}
 
 // https://github.com/pxlrbt/markdown-css
 .chat-message-markdown {
@@ -21,8 +37,7 @@
 		4. Prevent font size adjustment after orientation changes (IE, iOS)
 		5. Prevent overflow from long words (all)
 	*/
-	font-size: 125%; /* 2 */
-	line-height: 1.6; /* 3 */
+	line-height: 1.4; /* 3 */
 	-webkit-text-size-adjust: 100%; /* 4 */
 	word-break: break-word; /* 5 */
 
@@ -391,7 +406,7 @@
 	h4,
 	h5,
 	h6 {
-		margin: 3.2rem 0 0.8em;
+		margin: 2rem 0 0.8em;
 	}
 
 	/*
@@ -561,7 +576,6 @@
 
 	kbd, /* different style for kbd? */
 	code {
-		background: #eee;
 		padding: 0.1em 0.25em;
 		border-radius: 0.2rem;
 		-webkit-box-decoration-break: clone;
@@ -581,7 +595,7 @@
 
 	pre code {
 		display: block;
-		padding: 0.3em 0.7em;
+		padding: 0 0 0.5rem 0.5rem;
 		word-break: normal;
 		overflow-x: auto;
 	}
@@ -625,5 +639,16 @@
 
 	body > a:first-child:focus {
 		top: 1rem;
+	}
+
+	// Lists
+	ul,
+	ol {
+		padding-left: 1.5rem;
+		margin-bottom: 1rem;
+
+		li {
+			margin-bottom: 0.5rem;
+		}
 	}
 }
